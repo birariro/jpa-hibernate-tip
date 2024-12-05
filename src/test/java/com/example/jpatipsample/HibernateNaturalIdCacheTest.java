@@ -1,5 +1,7 @@
-package com.example.jpatipsample.domain;
+package com.example.jpatipsample;
 
+import com.example.jpatipsample.domain.PaymentCard;
+import com.example.jpatipsample.domain.PaymentCards;
 import com.example.jpatipsample.utils.QueryAssertions;
 import com.example.jpatipsample.utils.QueryAssertionsConfig;
 import jakarta.persistence.EntityManager;
@@ -16,7 +18,7 @@ import org.springframework.context.annotation.Import;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import({QueryAssertionsConfig.class})
-class PaymentCardsTest {
+class HibernateNaturalIdCacheTest {
     @Autowired
     private PaymentCards paymentCards;
     @PersistenceContext
@@ -43,7 +45,7 @@ class PaymentCardsTest {
             paymentCards.findById(paymentCard.getId());
             paymentCards.findById(paymentCard.getId());
             paymentCards.findById(paymentCard.getId());
-        }).isCountTo(1);
+        }).isExecuteCountTo(1);
     }
 
     @Test
@@ -55,7 +57,7 @@ class PaymentCardsTest {
             paymentCards.findByOwnerId(card.getOwnerId());
             paymentCards.findByOwnerId(card.getOwnerId());
             paymentCards.findByOwnerId(card.getOwnerId());
-        }).isCountTo(4);
+        }).isExecuteCountTo(4);
     }
 
     @Test
@@ -67,7 +69,7 @@ class PaymentCardsTest {
             paymentCards.findByNumber(card.getNumber());
             paymentCards.findByNumber(card.getNumber());
             paymentCards.findByNumber(card.getNumber());
-        }).isCountTo(1);
+        }).isExecuteCountTo(1);
     }
 
 }

@@ -1,0 +1,10 @@
+spring:
+  config:
+    location: classpath:application.yml
+
+  jpa:
+    properties:
+      hibernate:
+        query:
+          in_clause_parameter_padding: true
+          plan_cache_max_size: 204

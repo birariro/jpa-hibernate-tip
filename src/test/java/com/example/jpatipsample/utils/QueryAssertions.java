@@ -1,39 +1,35 @@
 package com.example.jpatipsample.utils;
 
 
-import com.example.jpatipsample.utils.support.Counter;
+import com.example.jpatipsample.utils.support.QueryAssertion;
+import com.example.jpatipsample.utils.support.QueryStorage;
+import org.springframework.util.StopWatch;
 
 /**
- * 쿼리의 실행 수를 테스트 할수있게 한다.
+ * 스레드별로 쿼리의 상태를 추적한다
  */
 public class QueryAssertions {
 
-    private static final ThreadLocal<Counter> counter = new ThreadLocal<>();
+    private static final ThreadLocal<QueryStorage> queryStorages = ThreadLocal.withInitial(QueryStorage::new);
+    private static final ThreadLocal<StopWatch> stopWatchs = ThreadLocal.withInitial(StopWatch::new);
 
-    public static QueryAssertions assertThat(Runnable executable) {
-        Counter counter = QueryAssertions.counter.get();
-        counter.init();
+    public static QueryAssertion assertThat(Runnable executable) {
+
+        StopWatch stopWatch = QueryAssertions.stopWatchs.get();
+        QueryStorage queryStorage = QueryAssertions.queryStorages.get();
+        queryStorage.clear();
+
+        stopWatch.start();
         executable.run();
-        return new QueryAssertions();
+        stopWatch.stop();
+        
+        return new QueryAssertion(queryStorage, stopWatch);
     }
 
-    public static Counter getCounter() {
-        counter.set(new Counter());
-        return counter.get();
+    public static QueryStorage getQueryStorage() {
+        return QueryAssertions.queryStorages.get();
     }
 
-    public void isCountTo(int expected) {
 
-        Counter counter = QueryAssertions.counter.get();
-        int queryCount = counter.getCount();
-
-        QueryAssertions.counter.remove();
-
-        if (queryCount != expected) {
-            throw new IllegalArgumentException(String.format("""
-                                        
-                    Expected: %s
-                    Actual: %s""", expected, queryCount));
-        }
-    }
 }
+

@@ -9,22 +9,25 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.NaturalId;
 
 @Entity
 @Table(name = "tb_payment_card")
 @Getter
+@Setter
 @EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@DynamicUpdate
+@DynamicInsert
 public class PaymentCard extends Identifiable {
 
     @Column(name = "owner_id", unique = true)
     private String ownerId;
 
-    /**
-     * todo tip
-     */
     @NaturalId
     @Column(name = "number", unique = true)
     private String number;
@@ -36,15 +39,6 @@ public class PaymentCard extends Identifiable {
     private String expiryDate;
 
     public static PaymentCard of(String ownerId, String number, String cvc, String expiryDate) {
-        if (number.length() < 10 || number.length() > 16) {
-            throw new IllegalArgumentException("The 'card number' is 10 to 16 length");
-        }
-        if (cvc.length() != 3) {
-            throw new IllegalArgumentException("The 'card cvc' is 3 length");
-        }
-        if (expiryDate.length() != 4) {
-            throw new IllegalArgumentException("The 'card expiry date' is 4 length");
-        }
         return new PaymentCard(ownerId, number, cvc, expiryDate);
     }
 }

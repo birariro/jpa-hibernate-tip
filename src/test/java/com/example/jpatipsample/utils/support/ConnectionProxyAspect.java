@@ -21,13 +21,16 @@ public class ConnectionProxyAspect {
 
         Connection connection = (Connection) point.proceed();
 
-        Counter counter = QueryAssertions.getCounter();
+        QueryStorage queryStorage = QueryAssertions.getQueryStorage();
         Connection proxyConnection = (Connection) Proxy.newProxyInstance(
                 getClass().getClassLoader(),
                 new Class[]{Connection.class},
                 (proxy, method, args) -> {
+
                     if (method.getName().equals("prepareStatement")) {
-                        counter.increase();
+                        if (queryStorage != null) {
+                            queryStorage.pushQueryString(String.valueOf(args[0]));
+                        }
                     }
                     return method.invoke(connection, args);
                 }
