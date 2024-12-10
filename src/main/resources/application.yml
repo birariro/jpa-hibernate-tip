@@ -6,7 +6,7 @@ server:
       force: true
 spring:
   application:
-    name: jpa-tip-sample
+    name: jpa-hibernate-tip
   datasource:
     url: jdbc:postgresql://127.0.0.1:7777/docker_postgresql
     username: postgres
@@ -21,7 +21,7 @@ spring:
       hibernate:
         highlight_sql: true
         format_sql: true
-      
+
 
 logging:
   level:
