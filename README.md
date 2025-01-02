@@ -152,44 +152,43 @@ StatelessSession은 SessionFactory를 통해 생성되며 1차캐시 및 2차캐
 하이버네이트의 이벤트 모델과 인터셉터가 동작하지않는다
 
 따라서 더티채킹, Lazy loading, 캐시 등이 필요하지 않는 Read-Only 혹은 Batch Processing에서 StatfulSession 보다 성능을 챙길수있고 오버헤드를 줄이는데 도움이 된다
-
 ```java
-public void method(){
 
-        StatelessSession statelessSession=null;
-        Transaction transaction=null;
+public void method() {
 
-        try{
+    StatelessSession statelessSession = null;
+    Transaction transaction = null;
 
-        statelessSession=entityManager.getEntityManagerFactory()
-        .unwrap(SessionFactory.class)
-        .openStatelessSession();
+    try {
 
-        transaction=statelessSession.beginTransaction();
-        String uniqueValue=UUID.randomUUID()+"_"+System.nanoTime();
+        statelessSession = entityManager.getEntityManagerFactory()
+                .unwrap(SessionFactory.class)
+                .openStatelessSession();
 
-        MutationQuery query=statelessSession.createMutationQuery(
-        "UPDATE PaymentCard c "+
-        "SET c.ownerId = :uuid, c.number = :uuid, c.cvc = NULL, c.expiryDate = NULL "
-        );
-        query.setParameter("uuid",uniqueValue);
+        transaction = statelessSession.beginTransaction();
+        String uniqueValue = UUID.randomUUID() + "_" + System.nanoTime();
+        
+        MutationQuery query = statelessSession.createMutationQuery(
+                "UPDATE PaymentCard c " +
+                        "SET c.ownerId = :uuid, c.number = :uuid, c.cvc = NULL, c.expiryDate = NULL "
+                        );
+        query.setParameter("uuid", uniqueValue);
         query.executeUpdate();
-
+        
         transaction.commit();
 
-        }catch(Exception e){
-        if(transaction!=null){
-        transaction.rollback();
+    } catch (Exception e) {
+        if (transaction != null) {
+            transaction.rollback();
         }
         e.printStackTrace();
-        }finally{
-        if(statelessSession!=null){
-        statelessSession.close();
+    } finally {
+        if (statelessSession != null) {
+            statelessSession.close();
         }
-        }
-        }
+    }
+}
 ```
-
 샘플 코드: https://github.com/birariro/jpa-tip-example/blob/main/src/test/java/com/example/jpatipsample/HibernateStatelessSessionTest.java
 
 ## hibernate의 parameter padding 로 in 쿼리 최적화

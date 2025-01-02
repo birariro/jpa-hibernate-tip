@@ -67,5 +67,3 @@ class HibernateDynamicInsertTest {
         assertThat(dynamicUpdateQuery).isEqualTo("insert into tb_payment_card (number,owner_id) values (?,?)");
     }
 }
-
-
