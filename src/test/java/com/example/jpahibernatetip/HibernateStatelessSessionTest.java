@@ -6,8 +6,6 @@ import com.example.jpahibernatetip.support.IdGenerator;
 import com.example.jpahibernatetip.utils.QueryAssertions;
 import com.example.jpahibernatetip.utils.QueryAssertionsConfig;
 import com.example.jpahibernatetip.utils.support.QueryAssertion;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,30 +23,34 @@ import java.util.List;
 @Import({QueryAssertionsConfig.class})
 class HibernateStatelessSessionTest {
 
-    List<Long> paymentCardIds;
     @Autowired
     private PaymentCards paymentCards;
-
-    @PersistenceContext
-    private EntityManager entityManager;
+    private List<PaymentCard> paymentCardList;
+    private List<PaymentCard> paymentCardList2;
 
     @BeforeEach
     void init() {
 
-        List<PaymentCard> paymentCardList = new ArrayList<>();
+        this.paymentCardList = new ArrayList<>();
+        this.paymentCardList2 = new ArrayList<>();
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1000; i++) {
             String id = IdGenerator.generateULID();
-            PaymentCard paymentCard = paymentCards.save(PaymentCard.of(
+            String id2 = IdGenerator.generateULID();
+            paymentCardList.add(PaymentCard.of(
                     id,
                     id,
                     "401",
                     "0131"
             ));
-            paymentCardList.add(paymentCard);
+            paymentCardList2.add(PaymentCard.of(
+                    id2,
+                    id2,
+                    "101",
+                    "0101"
+            ));
+
         }
-        entityManager.clear();
-        this.paymentCardIds = paymentCardList.stream().map(PaymentCard::getId).toList();
     }
 
 
@@ -56,14 +58,13 @@ class HibernateStatelessSessionTest {
     @DisplayName("statelessSession 이 stateFulSession 보다 실행 속도가 빠르다")
     void fastStatelessQueryThenStateFul() {
 
-        QueryAssertion queryAssertion = QueryAssertions.assertThat(() -> {
-            paymentCards.deleteAllData(paymentCardIds);
-        });
-
         QueryAssertion statelessQueryAssertion = QueryAssertions.assertThat(() -> {
-            paymentCards.statelessDeleteAllData(paymentCardIds);
+            paymentCards.statelessSaveAll(paymentCardList2);
         });
-
+        QueryAssertion queryAssertion = QueryAssertions.assertThat(() -> {
+            paymentCards.saveAll(paymentCardList);
+        });
+        
         statelessQueryAssertion.isFast(queryAssertion);
     }
 }

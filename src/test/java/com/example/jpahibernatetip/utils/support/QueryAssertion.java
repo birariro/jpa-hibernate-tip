@@ -25,7 +25,9 @@ public class QueryAssertion {
     public void isFast(QueryAssertion other) {
         double actualTime = getExecuteTimeSeconds();
         double otherTime = other.getExecuteTimeSeconds();
-        if (actualTime > otherTime) {
+
+
+        if (actualTime < otherTime) {
             return;
         }
         throw new IllegalArgumentException(String.format("%s is not faster than %s", actualTime, otherTime));

@@ -8,5 +8,5 @@ import java.util.Optional;
 public interface PaymentCardsQuery {
     Optional<PaymentCard> findByNumber(String paymentCardNumber);
 
-    void statelessDeleteAllData(List<Long> ids);
+    void statelessSaveAll(List<PaymentCard> paymentCards);
 }

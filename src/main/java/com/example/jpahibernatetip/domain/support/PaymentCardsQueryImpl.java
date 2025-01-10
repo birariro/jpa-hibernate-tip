@@ -7,11 +7,9 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.StatelessSession;
 import org.hibernate.Transaction;
-import org.hibernate.query.MutationQuery;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @RequiredArgsConstructor
 class PaymentCardsQueryImpl implements PaymentCardsQuery {
@@ -25,40 +23,22 @@ class PaymentCardsQueryImpl implements PaymentCardsQuery {
                 .loadOptional(paymentCardNumber);
     }
 
-    public void statelessDeleteAllData(List<Long> ids) {
+    public void statelessSaveAll(List<PaymentCard> paymentCards) {
+        StatelessSession statelessSession = entityManager.getEntityManagerFactory()
+                .unwrap(SessionFactory.class)
+                .openStatelessSession();
 
-        StatelessSession statelessSession = null;
-        Transaction transaction = null;
-
+        Transaction tx = statelessSession.beginTransaction();
         try {
-
-            statelessSession = entityManager.getEntityManagerFactory().unwrap(SessionFactory.class)
-                    .openStatelessSession();
-
-            transaction = statelessSession.beginTransaction();
-            for (long id : ids) {
-                String uniqueValue = UUID.randomUUID() + "_" + System.nanoTime();
-                MutationQuery query = statelessSession.createMutationQuery(
-                        "UPDATE PaymentCard c " +
-                                "SET c.ownerId = :uuid, c.number = :uuid, c.cvc = NULL, c.expiryDate = NULL " +
-                                "WHERE c.id = :id");
-                query.setParameter("uuid", uniqueValue);
-                query.setParameter("id", id);
-
-                query.executeUpdate();
+            for (PaymentCard card : paymentCards) {
+                statelessSession.insert(card);
             }
-
-            transaction.commit();
-
+            tx.commit();
         } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
+            tx.rollback();
+            throw e;
         } finally {
-            if (statelessSession != null) {
-                statelessSession.close();
-            }
+            statelessSession.close();
         }
     }
 }
